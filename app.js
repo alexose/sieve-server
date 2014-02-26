@@ -76,24 +76,12 @@ http.createServer(function(request, response) {
 function explain(request, response){
 
   // Load HTML template
-  fs.readFile('index.html', 'utf8', template)
-
-  function template(err, html){
-    try{
-      fs.readFile('node_modules/sieve/README.md', 'utf8', function(err, markdown){
-        
-        // Render README.md
-        var marked = require('marked')
-          , docs = marked(markdown);
-
-        // Insert into template
-        html = html.replace('{{docs}}', docs);
-
-        respond(response, html);
-      });
-    } catch(e){
-      respond(response, 'Could not find Sieve library.  Did you run npm install?');
-    }
+  try{
+    fs.readFile('index.html', 'utf8', function(err, html){
+      respond(response, html);
+    });
+  } catch(e){
+    respond(response, 'Could not find Sieve library.  Did you run npm install?');
   }
 }
 

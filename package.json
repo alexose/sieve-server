@@ -4,7 +4,6 @@
   "author": "Alexander Ose <alex@alexose.com>",
   "engine": "node >= 0.10.17",
   "dependencies": {
-    "marked": "~0.3.1",
     "sieve" : ">0.0.0"
   }
 }
