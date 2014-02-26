@@ -56,12 +56,15 @@ var tutorial = [
 var server = 'http://alexose.com:3008';
 
 var post = function(server, request){
+
+    request = JSON.stringify(request);
+
     $.post(server, request)
         .success(function(response){
             console.log(response);
         })
         .error(function(response){
-            console.log('%c' + response, 'color: red');
+            console.log(response);
         });
 
     return "POSTing to server...";
