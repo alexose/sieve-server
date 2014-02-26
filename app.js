@@ -19,7 +19,7 @@ http.createServer(function(request, response) {
       data += d;
       if(data.length > 1e6) {
         data = "";
-        response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+        respond(response, "", null, 413);
         request.connection.destroy();
       }
     });
@@ -52,9 +52,7 @@ http.createServer(function(request, response) {
   }
 
   function error(string){
-    response.writeHead(200, { "Content-Type" : 'text' });
-    response.write(string);
-    response.end();
+    respond(response, string, "text", 500);
   }
       
   function finish(results){
@@ -67,9 +65,7 @@ http.createServer(function(request, response) {
       string = queries.callback + '(' + string + ')';
     }
 
-    response.writeHead(200, { "Content-Type" : type });
-    response.write(string);
-    response.end();
+    respond(response, string, type);
   }
 }).listen(port, function(){
   console.log('Server running on port ' + port);
@@ -81,18 +77,30 @@ function explain(request, response){
   fs.readFile('index.html', 'utf8', template)
 
   function template(err, html){
-    fs.readFile('README.md', 'utf8', function(err, markdown){
-      
-      // Render README.md
-      var marked = require('marked')
-        , docs = marked(markdown);
+    try{
+      fs.readFile('node_modules/sieve/README.md', 'utf8', function(err, markdown){
+        
+        // Render README.md
+        var marked = require('marked')
+          , docs = marked(markdown);
 
-      // Insert into template
-      html = html.replace('{{docs}}', docs);
+        // Insert into template
+        html = html.replace('{{docs}}', docs);
 
-      response.writeHead(200, {"Content-Type": "text/html"});
-      response.write(html);
-      response.end();
-    });
+        respond(response, html);
+      });
+    } catch(e){
+      respond(response, 'Could not find Sieve library.  Did you run npm install?');
+    }
   }
+}
+
+function respond(response, string, type, code){
+
+  type = type || "text/html";
+  code = code || 200;
+
+  response.writeHead(code, {"Content-Type" : type });
+  response.write(string);
+  response.end();
 }
