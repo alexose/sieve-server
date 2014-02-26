@@ -5,7 +5,7 @@ var http = require("http")
   , querystring = require("querystring")
   , Sieve = require("sieve");
 
-var port = process.argv && process.argv.length > 2 ? process.argv[2] : 3008;
+var port = process.argv && process.argv.length > 2 ? process.argv[2] : 3000;
 
 http.createServer(function(request, response) {
 
@@ -33,12 +33,14 @@ http.createServer(function(request, response) {
     });
   } else {
 
+    // TODO: Support normal query strings?
+
     // Support GET base64 failover
     if (queries.json){
       try {
 
         // via https://groups.google.com/forum/#!topic/nodejs/m6MQDXJNx7w
-        var string = new Buffer(queries.json, 'base64').toString('binary') 
+        var string = new Buffer(queries, 'base64').toString('binary') 
       } catch(e){
 
         //error('Could not convert query from Base64 to string.  Are you sure it\'s encoded properly?');

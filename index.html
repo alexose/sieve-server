@@ -5,7 +5,11 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   </head>
   <body>
+    
       <div class="container">
+          <hr />
+          <div class="alert alert-info"><b>Try it!</b>  Open up your DevTools console to get started.</div>
+          <hr />
           {{docs}}
       </div>
   </body>
@@ -14,8 +18,6 @@
 if (typeof(console) !== "undefined"){
 
 }
-
-var server = 'http://alexose.com:3008';
 
 var tutorial = [
     [
@@ -29,7 +31,7 @@ var tutorial = [
         "To get you started, we've already set up a few variables:",
         "",
         "    server",
-        "    query ",
+        "    post",
         "",
         "To continue, type \"more()\""
     ],
@@ -43,19 +45,33 @@ var tutorial = [
         "",
         "(We've set this up one for you as well.  No need to copy and paste.)",
         "",
-        "Let's POST this request to the server using jQuery.  Try typing the following:",
+        "Let's POST this request to the server using our predefined post function.  Try typing the following:",
         "",
-        "    $.post(server, request);",
+        "    post(server, request);",
         "",
         "Note that you can always return to the previous step by typing \"last()\"!"
     ]
 ];
 
+var server = 'http://alexose.com:3008';
+
+var post = function(server, request){
+    $.post(server, request)
+        .success(function(response){
+            console.log(response);
+        })
+        .error(function(response){
+            console.log('%c' + response, 'color: red');
+        });
+
+    return "POSTing to server...";
+};
+
 var pos = 0;
 
 var request = { "url" : "https://api.github.com/repos/alexose/sieve/commits", "selector" : ".commit .date" };
 
-function more(){
+var more = function(){
     var text = tutorial[pos].map(function(d){ return d + "\n"; });
 
     if (pos){
@@ -64,6 +80,8 @@ function more(){
 
     console.log.apply(console, text);
     pos++;
+
+    return '';
 }
 more();
 
