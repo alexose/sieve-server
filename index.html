@@ -5,7 +5,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   </head>
   <body>
-    
+      <a href="https://github.com/alexose/sieve"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
       <div class="container">
           <h1>Sieve</h1>
           <div class="alert alert-info"><b>Try it!</b>  Open up your DevTools console to get started.</div>
@@ -38,17 +38,60 @@ var tutorial = [
         "",
         "    var request = {",
         "        \"url\" : \"https://api.github.com/repos/alexose/sieve/commits\",",
-        "        \"selector\" : \".commit .date\"",
+        "        \"selector\" : \".commit .author .date\"",
         "    };",
         "",
-        "(We've set this up one for you as well.  No need to copy and paste.)",
+        "(We've set this variable up for you as well.)",
         "",
         "Let's POST this request to the server.  Try typing the following:",
         "",
         "    post(server, request);",
         "",
         "Note that you can always return to the previous step by typing \"last()\"!"
-    ]
+    ],
+    [
+        "Great!  You retrieved the dates of each commit for this project.",
+        "",
+        "Pretty easy, right? You can see how this would easy this would make it to get data into your client-side application.",
+        "",
+        "Now let's try something a little more complicated.  Type more() to continue."
+    ],
+    [
+        "It's often helpful to combine multiple pieces of information.",
+        "Sieve allows you to specify multiple selectors in a single request, like so:",
+        "",
+        "    request = {",
+        "        \"url\" : \"https://api.github.com/repos/alexose/sieve/commits\",",
+        "        \"selector\" : {",
+        "            \"date\" : \".commit .date\",",
+        "            \"message\" : \".commit .message\"",
+        "        }",
+        "    };",
+        "",
+        "Now let's POST it to the server by typing the following:",
+        "",
+        "    post(server, request);"
+    ],
+    [
+        "Perfect.",
+        "",
+        "You might have noticed how fast that response was-- That's because Sieve automatically caches HTTP requests.",
+        "",
+        "Type more() to continue."
+    ],
+    [   
+        "But what if the site we're interested in doesn't return JSON?  Then what?",
+        "",
+        "Using different types of selectors is easy.  Try this:",
+        "",
+        "    request = {",
+        "        \"url\" : \"https://www.google.com/finance\",",
+        "        \"selector\" : \"//table[@id='sfe-mktsumm']/tbody/tr[1]/td\"",
+        "    };",
+    ],
+    [
+        "Perfect.  You just retrieved the current value of the Dow Jones Industrial from Google Finance."  
+    ],
 ];
 
 var server = 'http://alexose.com:3008';
@@ -60,6 +103,7 @@ var post = function(server, request){
     $.post(server, request)
         .success(function(response){
             console.log(response);
+            more();
         })
         .error(function(response){
             console.log(response);
@@ -86,6 +130,10 @@ var more = function(){
 }
 more();
 
+var last = function(){
+    pos--;
+    more();
+}
   </script>
 </html>
 
