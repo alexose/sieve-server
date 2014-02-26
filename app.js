@@ -40,13 +40,14 @@ http.createServer(function(request, response) {
       try {
 
         // via https://groups.google.com/forum/#!topic/nodejs/m6MQDXJNx7w
-        var string = new Buffer(queries, 'base64').toString('binary') 
+        var string = new Buffer(queries.json, 'base64').toString('binary') 
       } catch(e){
 
         //error('Could not convert query from Base64 to string.  Are you sure it\'s encoded properly?');
         error(e.toString());
         return;
       }
+
       new Sieve(string, finish);
     } else {
       explain(request, response);
