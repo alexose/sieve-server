@@ -1,9 +1,10 @@
 {
-  "name": "sieve",
+  "name": "sievejs-server",
   "description": "Turns any API into a client-side API.",
   "author": "Alexander Ose <alex@alexose.com>",
   "engine": "node >= 0.10.17",
+  "version": "0.0.1",
   "dependencies": {
-    "sieve" : ">0.0.0"
+    "sievejs" : ">0.0.0"
   }
 }
