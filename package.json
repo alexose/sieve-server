@@ -3,7 +3,12 @@
   "description": "Turns any API into a client-side API.",
   "author": "Alexander Ose <alex@alexose.com>",
   "engine": "node >= 0.10.17",
-  "version": "0.0.1",
+  "version": "0.0.4",
+  "main": "./app.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:alexose/sieve-server.git"
+  },
   "dependencies": {
     "sievejs" : ">0.0.0"
   }
