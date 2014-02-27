@@ -88,10 +88,15 @@ function explain(request, response){
 
 function respond(response, string, type, code){
 
+  var origin = "http://alexose.github.io";
+
   type = type || "text/html";
   code = code || 200;
 
-  response.writeHead(code, {"Content-Type" : type });
+  response.writeHead(code, {
+    "Content-Type": type, 
+    "Access-Control-Allow-Origin": origin
+  });
   response.write(string);
   response.end();
 }
