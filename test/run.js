@@ -4,19 +4,21 @@ var http = require("http")
   , url = require("url")
   , fs = require("fs")
   , querystring = require("querystring")
-  , Sieve = require("../lib/sieve");
+  , Sieve = require("sievejs");
 
 var port = process.argv && process.argv.length > 2 ? process.argv[2] : 24816;
 
 server = http
   .createServer(handler)
-  .listen(port, start); 
+  .listen(port, start);
 
 // Begin running tests
 function start(){
   console.log('Test server running on port ' + port + '.');
 
-  var files = require("fs").readdirSync("./tests")
+  var folder = require('path').dirname(require.main.filename);
+
+  var files = require("fs").readdirSync(folder + "/tests")
     , success = true;
 
   // Execute tests one at a time
@@ -31,14 +33,15 @@ function start(){
   })(files, 0);
 
   function run(test, callback){
+
     var string = JSON.stringify(test.json);
 
-
     var sieve = new Sieve(string, function(result){
-      result = result.result;
+
+      result = result[0].result;
 
       if (result == test.expected){
-        console.log(test.name + ' succeeded.'); 
+        console.log(test.name + ' succeeded.');
       } else {
         console.log(test.name + ' failed:  Expected "' + test.expected + '" and got "' + result + '".');
         success = false;
@@ -49,7 +52,7 @@ function start(){
   }
 }
 
-// Close server and return results 
+// Close server and return results
 function stop(success){
   server.close();
 
@@ -61,7 +64,9 @@ function stop(success){
 // Request handler
 function handler(request, response){
 
-  var queries = querystring.parse(request.url.split('?')[1]);
+  var url = request.url
+    , arr = url.split('?')
+    , string = 'GET Request';
 
   if (request.method == 'POST'){
 
@@ -75,13 +80,17 @@ function handler(request, response){
         request.connection.destroy();
       }
     });
-  
-    // Handle successful POST 
-    respond(response, 'POST Request');
+
+    string = 'POST Request';
   } else {
 
-    // Handle GET or other methods
-    respond(response, 'GET Request');
+  }
+
+  if (arr.length > 1){
+    var queries = querystring.parse(arr[1]);
+    respond(response, queries);
+  } else {
+    respond(response, string);
   }
 }
 
