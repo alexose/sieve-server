@@ -23,6 +23,19 @@ http.createServer(function(request, response) {
 
   var queries = qs.parse(request.url.split('?')[1]);
 
+  var options = {};
+
+  if (queries.streaming){
+    options.hooks = {
+      onStart:     sendID,
+      onIncrement: stream
+    };
+  } else {
+    options.hooks = {
+      onFinish : finish
+    };
+  }
+
   if (request.method == 'POST'){
 
     // Prevent overflow
@@ -39,7 +52,7 @@ http.createServer(function(request, response) {
     // Handle successful post
     request.on('end', function(){
 
-      new Sieve(data, null, increment, finish);
+      new Sieve(data, options);
 
     });
   } else {
@@ -60,7 +73,7 @@ http.createServer(function(request, response) {
         return;
       }
 
-      new Sieve(string, null, increment, finish);
+      new Sieve(string, options);
     } else {
       explain(request, response);
     }
@@ -70,13 +83,18 @@ http.createServer(function(request, response) {
     respond(response, string, "text", 500);
   }
 
-  // Append a result to the outgoing stream
-  function increment(result){
-
+  // Respond with ID of given request.  This will allow the client to connect via socket.
+  function sendID(result){
+    respond('hey there');
   }
 
-  // End the stream
-  function finish(results){
+  // Append a result to the outgoing stream
+  function stream(result){
+    console.log('increment');
+  }
+
+  // End the response
+  function end(results){
 
     var string = JSON.stringify(results)
       , type = "text/plain";
