@@ -36,7 +36,6 @@ wss.on('connection', function(ws){
   });
 
   function start(){
-    send('start');
   }
 
   function increment(result){
