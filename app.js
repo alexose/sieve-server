@@ -12,29 +12,59 @@ var ports = {
   socket : args[3] || 8080
 };
 
+// Websocket interface
 var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({port: ports.socket});
 
-wss.on('connection', function(ws) {
-  ws.send('Sieve websocket connected.');
+wss.on('connection', function(ws){
+
+  send('connect');
+
+  var options = {
+    hooks : {
+      onStart:     start,
+      onIncrement: increment,
+      onFinish:    finish
+    }
+  };
+
+  ws.on('message', function(data){
+
+    send('Recieved Sieve request.  Processing... ');
+
+    new Sieve(data, options);
+  });
+
+  function start(){
+    send('start');
+  }
+
+  function increment(result){
+    send('result', result);
+  }
+
+  function finish(results){
+    send('complete');
+  }
+
+  function send(type, data){
+    ws.send(JSON.stringify({
+      message : type,
+      data : data
+    }));
+  }
 });
 
+// HTTP interface
 http.createServer(function(request, response) {
 
   var queries = qs.parse(request.url.split('?')[1]);
 
-  var options = {};
-
-  if (queries.streaming){
-    options.hooks = {
-      onStart:     sendID,
-      onIncrement: stream
-    };
-  } else {
-    options.hooks = {
+  var options = {
+    hooks : {
       onFinish : finish
-    };
-  }
+    }
+  };
 
   if (request.method == 'POST'){
 
@@ -44,7 +74,7 @@ http.createServer(function(request, response) {
       data += d;
       if(data.length > 1e6) {
         data = "";
-        respond(response, "", null, 413);
+        respond("", null, 413);
         request.connection.destroy();
       }
     });
@@ -75,26 +105,26 @@ http.createServer(function(request, response) {
 
       new Sieve(string, options);
     } else {
-      explain(request, response);
+      explain();
     }
   }
 
   function error(string){
-    respond(response, string, "text", 500);
+    respond(string, "text", 500);
   }
 
-  // Respond with ID of given request.  This will allow the client to connect via socket.
-  function sendID(result){
-    respond('hey there');
+  // TODO: authentication
+  function start(result){
+    respond(result.hash);
   }
 
   // Append a result to the outgoing stream
-  function stream(result){
+  function increment(result){
     console.log('increment');
   }
 
   // End the response
-  function end(results){
+  function finish(results){
 
     var string = JSON.stringify(results)
       , type = "text/plain";
@@ -105,35 +135,37 @@ http.createServer(function(request, response) {
       string = queries.callback + '(' + string + ')';
     }
 
-    respond(response, string, type);
+    respond(string, type);
   }
+
+  function explain(){
+
+    // Load HTML template
+    try{
+      fs.readFile('index.html', 'utf8', function(err, html){
+        respond(html);
+      });
+    } catch(e){
+      respond('Could not find Sieve library.  Did you run npm install?');
+    }
+  }
+
+  function respond(string, type, code){
+
+    var origin = "http://alexose.github.io";
+
+    type = type || "text/html";
+    code = code || 200;
+
+    response.writeHead(code, {
+      "Content-Type": type,
+      "Access-Control-Allow-Origin": origin
+    });
+    response.write(string);
+    response.end();
+  }
+
 }).listen(ports.http, function(){
   console.log('Server running on port ' + ports.http);
 });
 
-function explain(request, response){
-
-  // Load HTML template
-  try{
-    fs.readFile('index.html', 'utf8', function(err, html){
-      respond(response, html);
-    });
-  } catch(e){
-    respond(response, 'Could not find Sieve library.  Did you run npm install?');
-  }
-}
-
-function respond(response, string, type, code){
-
-  var origin = "http://alexose.github.io";
-
-  type = type || "text/html";
-  code = code || 200;
-
-  response.writeHead(code, {
-    "Content-Type": type,
-    "Access-Control-Allow-Origin": origin
-  });
-  response.write(string);
-  response.end();
-}
