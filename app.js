@@ -1,15 +1,27 @@
-var http = require("http")
-  , https = require("https")
-  , url = require("url")
-  , fs = require("fs")
-  , querystring = require("querystring")
-  , Sieve = require("sievejs");
+var http   = require("http")
+  , https  = require("https")
+  , url    = require("url")
+  , fs     = require("fs")
+  , qs     = require("querystring")
+  , Sieve  = require("sievejs");
 
-var port = process.argv && process.argv.length > 2 ? process.argv[2] : 3000;
+var args   = process.argv || [];
+
+var ports = {
+  http   : args[2] || 3000,
+  socket : args[3] || 8080
+};
+
+var WebSocketServer = require('ws').Server
+  , wss = new WebSocketServer({port: ports.socket});
+
+wss.on('connection', function(ws) {
+  ws.send('Sieve websocket connected.');
+});
 
 http.createServer(function(request, response) {
 
-  var queries = querystring.parse(request.url.split('?')[1]);
+  var queries = qs.parse(request.url.split('?')[1]);
 
   if (request.method == 'POST'){
 
@@ -23,24 +35,24 @@ http.createServer(function(request, response) {
         request.connection.destroy();
       }
     });
-  
+
     // Handle successful post
     request.on('end', function(){
 
-      // Suport JSONP
-      new Sieve(data, finish);
+      new Sieve(data, null, increment, finish);
 
     });
   } else {
 
     // TODO: Support normal query strings?
+    var string;
 
     // Support GET base64 failover
     if (queries.json){
       try {
 
         // via https://groups.google.com/forum/#!topic/nodejs/m6MQDXJNx7w
-        var string = new Buffer(queries.json, 'base64').toString('binary') 
+        string = new Buffer(queries.json, 'base64').toString('binary');
       } catch(e){
 
         //error('Could not convert query from Base64 to string.  Are you sure it\'s encoded properly?');
@@ -48,7 +60,7 @@ http.createServer(function(request, response) {
         return;
       }
 
-      new Sieve(string, finish);
+      new Sieve(string, null, increment, finish);
     } else {
       explain(request, response);
     }
@@ -57,21 +69,28 @@ http.createServer(function(request, response) {
   function error(string){
     respond(response, string, "text", 500);
   }
-      
+
+  // Append a result to the outgoing stream
+  function increment(result){
+
+  }
+
+  // End the stream
   function finish(results){
-      
+
     var string = JSON.stringify(results)
       , type = "text/plain";
 
+    // Support JSONP
     if (queries.callback){
-      type = "application/x-javascript"
+      type = "application/x-javascript";
       string = queries.callback + '(' + string + ')';
     }
 
     respond(response, string, type);
   }
-}).listen(port, function(){
-  console.log('Server running on port ' + port);
+}).listen(ports.http, function(){
+  console.log('Server running on port ' + ports.http);
 });
 
 function explain(request, response){
@@ -94,7 +113,7 @@ function respond(response, string, type, code){
   code = code || 200;
 
   response.writeHead(code, {
-    "Content-Type": type, 
+    "Content-Type": type,
     "Access-Control-Allow-Origin": origin
   });
   response.write(string);

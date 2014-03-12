@@ -4,6 +4,7 @@ Sieve Server
 Sieve Server is the HTTP-facing part of Sieve. It handles:
 
 * Sieve requests made from client-side applications
+* Streaming results
 * The Sieve documentation and tutorial
 
 And, in the future, will handle:

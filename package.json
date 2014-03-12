@@ -10,6 +10,8 @@
     "url": "git@github.com:alexose/sieve-server.git"
   },
   "dependencies": {
-    "sievejs" : ">0.0.0"
+    "sievejs": ">0.0.0",
+    "socket.io": "~0.9.16",
+    "ws": "~0.4.31"
   }
 }
