@@ -16,9 +16,8 @@ server = http
 function start(){
   console.log('Test server running on port ' + port + '.');
 
-  var folder = require('path').dirname(require.main.filename);
-
-  var files = require("fs").readdirSync(folder + "/tests")
+  var folder = require('path').dirname(require.main.filename)
+    , files = require("fs").readdirSync(folder + "/tests")
     , success = true;
 
   // Execute tests one at a time
@@ -31,24 +30,31 @@ function start(){
       stop();
     }
   })(files, 0);
+}
 
-  function run(test, callback){
+function run(test, callback){
 
-    var string = JSON.stringify(test.json);
+  var string = JSON.stringify(test.json)
+    , options = {
+      hooks : {
+        onFinish : onFinish
+      },
+      port : port
+    }
+    , success = true;
 
-    var sieve = new Sieve(string, function(result){
+  new Sieve(string, options);
 
-      result = result[0].result;
+  function onFinish(result){
 
-      if (result == test.expected){
-        console.log(test.name + ' succeeded.');
-      } else {
-        console.log(test.name + ' failed:  Expected "' + test.expected + '" and got "' + result + '".');
-        success = false;
-      }
+    if (result == test.expected){
+      console.log(test.name + ' succeeded.');
+    } else {
+      console.log(test.name + ' failed:  Expected "' + test.expected + '" and got "' + result + '".');
+      success = false;
+    }
 
-      callback(success);
-    }, { port : port });
+    callback(success);
   }
 }
 
