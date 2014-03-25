@@ -1,4 +1,10 @@
 // Sieve test suite
+//
+// This test suite spawns an HTTP server that returns data in various formats,
+// then iterates through each test in the the /tests folder.
+//
+// TODO: Consider combining server functionality into sieve-server
+
 var http = require("http")
   , https = require("https")
   , url = require("url")
@@ -47,6 +53,7 @@ function run(test, callback){
 
   function onFinish(result){
 
+    console.log(result);
     if (result == test.expected){
       console.log(test.name + ' succeeded.');
     } else {
@@ -67,11 +74,11 @@ function stop(success){
   process.exit(success ? 0 : 1);
 }
 
-// Request handler
+// Request handler.  This is the server side of the test suite.  In other words,
+// it's the part that's listening to Sieve's requests and responding accoridngly.
 function handler(request, response){
 
   var url = request.url
-    , arr = url.split('?')
     , string = 'GET Request';
 
   if (request.method == 'POST'){
@@ -88,16 +95,33 @@ function handler(request, response){
     });
 
     string = 'POST Request';
-  } else {
-
   }
 
-  if (arr.length > 1){
-    var queries = querystring.parse(arr[1]);
-    respond(response, queries);
-  } else {
-    respond(response, string);
-  }
+  route(url, string, response);
+}
+
+function route(url, string, response){
+
+    var arr = url.split('?')
+      , path = arr[0]
+      , queries = arr.length > 1 ? querystring.parse(arr[1]) : null;
+
+    switch(path){
+      case "/":
+        respond(response, string);
+        break;
+      case "/json":
+        respond(response, '[{ name : "name1" }, { name : "name2" }]');
+        break;
+      case "/html":
+        respond(response, '<html><body><h1>Test Data</h1><ul><li class="active">value1</li><li class="active">value2</li></body></html>');
+        break;
+      default:
+        respond(response, 'No path specified.');
+        break;
+    }
+
+    return;
 }
 
 function respond(response, message){

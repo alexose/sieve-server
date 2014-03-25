@@ -31,20 +31,102 @@
     <div id="home" class="container">
       <div class="jumbotron">
         <h1>Sieve</h1>
-        <p>Sieve makes any resource on the web available to your client-side application. It serves many purposes:</p>
-        <ul>
-          <li>Acts as a proxy for APIs that don't support JSONP</li>
-          <li>Simplifies excessively verbose responses using selectors (JSONSelect, Xpath, etc.)</li>
-          <li>Combines multiple HTTP requests into one</li>
-        </ul>
+        <p>Fetch data in a hurry.</p>
       </div>
-      <div class="alert alert-info"><b>Try it!</b>  Open up your DevTools console to get started.</div>
     </div>
 
     <div id="docs" class="container">
     </div>
 
+    <div id="example" class="container">
+      <div class="col-sm-6" class="container">
+        <pre id="request" contenteditable="true">{
+  "url" : "https://api.github.com/repos/alexose/sieve/commits",
+  "selector" : ".commit .date"
+}</pre>
+      </div>
+      <div class="col-sm-6">
+        <pre id="result"></pre>
+      </div>
+    </div>
+
+    <div id="tryit" class="container">
+      <div class="alert alert-info"><b>Try it!</b>  Open up your DevTools console to get started.</div>
+    </div>
+
   </body>
+
+  <script type="text/javascript">
+
+// Inline editor functionality
+$(document).ready(function(){
+
+    var url = 'http://sieve.alexose.com?callback=?',
+        timeout,
+        request;
+
+    $('#request')
+      .bind('keydown', keydown)
+      .bind('blur', blur);
+
+    function keydown(key){
+
+      clearTimeout(timeout);
+
+      // Wait 2 seconds and execute
+      timeout = setTimeout(go, 2000);
+    }
+
+    function blur(){
+        go();
+    }
+
+    function go(){
+        var alertClasses = 'alert alert-danger',
+            ele = $(this);
+
+        ele.removeClass('alert alert-danger');
+
+        var input = ele.text();
+        if (input !== request){
+            request = input;
+            try {
+              send(input);
+            } catch(error){
+              ele.addClass('alert alert-danger');
+            }
+        }
+    }
+    go();
+
+    function send(input){
+
+        var ele = $('#result').html('<div class="progress progress-striped active"><div class="progress-bar"  role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div></div>'),
+            str = btoa(JSON.stringify(input));
+
+        $.ajax({
+            url : url,
+            data : { json : str },
+            dataType : "jsonp",
+            success: display,
+            error: display
+        });
+
+    }
+
+    function display(result){
+        $('#result').text(result);
+    }
+
+});
+
+function update(){
+
+}
+
+  </script>
+
+
   <script type="text/javascript">
 
 if (typeof(console) !== "undefined"){
