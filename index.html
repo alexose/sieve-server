@@ -40,10 +40,13 @@
 
     <div id="example" class="container">
       <div class="col-sm-6" class="container">
-        <pre id="request" contenteditable="true">{
-  "url" : "https://api.github.com/repos/alexose/sieve/commits",
-  "selector" : ".commit .date"
-}</pre>
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#">JSON</a></li>
+          <li><a href="#">XPath</a></li>
+          <li><a href="#">Advanced</a></li>
+        </ul>
+        <pre id="request" contenteditable="true"></pre>
+
       </div>
       <div class="col-sm-6">
         <pre id="result" class="well"></pre>
@@ -63,8 +66,51 @@ $(document).ready(function(){
 
     var url = 'http://sieve.alexose.com?callback=?',
         ele = $('#request'),
+        tabs = $('#example ul li a'),
         timeout,
         request;
+
+    var examples = [
+            {
+                "url" : "https://api.github.com/repos/alexose/sieve/commits",
+                "selector" : ".commit .date"
+            },
+            {
+                "url" : "http://google.com/finance",
+                "selector" : "//td[@class='price']",
+                "engine" : "xpath"
+            },
+            {
+                "url" : "https://api.github.com/users/alexose/repos",
+                "method" : "GET",
+                "selector" : {
+                    "name" : ":nth-child(-n+4) .name"
+                },
+                "then" : {
+                    "url" : "https://api.github.com/repos/alexose/{{name}}/commits",
+                    "selector" : ".message"
+                }
+            }
+        ];
+
+    tabs.each(function(i){
+        $(this).click(function(e){
+            e.preventDefault();
+
+            var par = $(this).parent();
+
+            par.siblings().removeClass('active');
+            par.addClass('active');
+
+            ele.text(
+                JSON.stringify(examples[i], null, 4)
+            );
+
+            go();
+        });
+    });
+
+    tabs.first().trigger('click');
 
     ele
       .bind('keydown', keydown)
