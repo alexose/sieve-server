@@ -50,6 +50,7 @@
         <ul class="nav nav-tabs">
           <li class="active"><a href="#">JSON</a></li>
           <li><a href="#">XPath</a></li>
+          <li><a href="#">jQuery</a></li>
           <li><a href="#">Advanced</a></li>
         </ul>
         <pre style="word-wrap:initial" id="request" contenteditable="true"></pre>
@@ -86,6 +87,11 @@ $(document).ready(function(){
                 "url" : "http://google.com/finance",
                 "selector" : "//td[@class='price']",
                 "engine" : "xpath"
+                },
+            {
+                "url": "http://yelp.com/boston",
+                "selector": "a.biz-name",
+                "engine": "jquery"
             },
             {
                 "url" : "https://api.github.com/users/alexose/repos",
