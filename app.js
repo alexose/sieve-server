@@ -1,6 +1,7 @@
 var http   = require("http")
   , https  = require("https")
   , url    = require("url")
+  , path   = require("path")
   , fs     = require("fs")
   , qs     = require("querystring")
   , Sieve  = require("sievejs");
@@ -139,14 +140,26 @@ http.createServer(function(request, response) {
 
   function explain(){
 
-    // Load HTML template
-    try{
-      fs.readFile('index.html', 'utf8', function(err, html){
-        respond(html);
+    var uri = url.parse(request.url).pathname
+      , filename = path.join(process.cwd(), uri);
+
+    fs.exists(filename, function(exists) {
+      if(!exists) {
+        respond('Resource not found.', 'text/plain', 404);
+        return;
+      }
+
+      if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+
+      fs.readFile(filename, "binary", function(err, file) {
+        if(err) {
+          respond('Error: ' + err + '.', 'text/plain', 500);
+          return;
+        }
+
+        respond(file, 'text/html', 200);
       });
-    } catch(e){
-      respond('Could not find Sieve library.  Did you run npm install?');
-    }
+    });
   }
 
   function respond(string, type, code){
