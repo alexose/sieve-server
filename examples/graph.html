@@ -1,0 +1,166 @@
+<div class="container">
+  <h1>Sieve example: Graph</h1>
+  <p>Visualize a Reddit comment thread by the amount of comment karma each user has.</p>
+
+  <form class="form-inline" role="form">
+    <div class="form-group">
+      <input type="text" id="thread" class="form-control" placeholder="Thread ID">
+      <button id="go" class="btn btn-primary">Go!</button>
+    </div>
+  </form>
+  <div class="alert alert-danger alert-dismissable" style="display: none" id="error"></div>
+</div>
+<div id="graphs" class="container">
+  <svg id="graph">
+  </svg>
+</div>
+<div class="container">
+    <div class="alert alert-success alert-dismissable" style="display: none" id="display"></div>
+</div>
+
+<script>
+
+(function($){
+$(document).ready(function(){
+
+var request = {
+  url : 'http://www.reddit.com/r/aww/comments/{{id}}',
+  selector : {
+    userpage : "$('a.author').attr('href')"
+  },
+  data : {
+    id : '10',
+    parent : '5'
+  },
+  engine : "jquery",
+  then : {
+    url : "{{userpage}}",
+    selector : {
+      karma : "$('span.comment-karma')"
+    },
+    format : "{{karma}},{{id}},{{parent}}",
+    engine : "jquery"
+  },
+  wait : 5
+}
+
+var result  = $('#result');
+
+var server = 'ws://sieve.alexose.com:8082/'
+  , ws     = new WebSocket(server);
+
+ws.onmessage = function(event){
+
+  var str = event.data;
+
+  if (!str){
+      return;
+  }
+
+  graph(str);
+  display(JSON.parse(str));
+};
+
+$('#go').click(function(e){
+
+    e.preventDefault();
+
+    // Read request from textarea
+    var str = $('#thread').val();
+
+    // Basic validation
+    if (!str || !str.length){
+        error('Please type a request.');
+        return;
+    }
+
+    request.data = { id : str };
+
+    var json = JSON.stringify(request);
+    // Send request to Sieve using websocket
+    ws.send(json);
+});
+
+function prettyPrint(json){
+    return JSON.stringify(json, null, '\t');
+}
+
+// Pretty-print request
+function display(json){
+    var str = prettyPrint(json);
+
+    $('#display')
+        .prepend(
+            $('<pre />')
+                .html(str)
+        )
+        .fadeIn();
+}
+
+// Bootstrappy error handler
+var timeout;
+function error(message){
+
+    var el = $('#error');
+
+    el
+        .text(message)
+        .fadeIn();
+
+    if (timeout){
+        clearTimeout(timeout);
+    }
+
+    var timeout = setTimeout(function(){
+        el.fadeOut();
+    }, 6000);
+}
+
+});
+})(jQuery);
+
+var data = [];
+
+var scale = d3.scale.log()
+  .domain([1, 20000])
+  .range([0, 100]);
+
+var force = d3.layout.force()
+  .gravity(.05)
+  .distance(100)
+  .charge(-100);
+
+// Add point to graph
+function graph(json){
+
+  var obj = JSON.parse(json);
+
+  if (obj.data){
+    data.push(obj.data[0]);
+  } else {
+    return;
+  }
+
+  force.nodes(data.map(function(d){
+      return { name : 'node', size : d };
+    }));
+
+  var svg = d3.select('#graph');
+
+  var circles = svg
+    .selectAll('circle')
+      .data(force.nodes())
+      .enter()
+        .append('circle')
+        .attr('r', function(d){ return scale(Math.abs(d.size)); })
+        .attr('fill', function(d){ return d < 0 ? 'red' : 'green' })
+        .attr('stroke', '#111111');
+
+    force.on("tick", function() {
+      circles.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    });
+
+    force.start()
+}
+
+</script>

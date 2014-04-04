@@ -48,10 +48,15 @@ wss.on('connection', function(ws){
   }
 
   function send(type, data){
-    ws.send(JSON.stringify({
-      message : type,
-      data : data
-    }));
+    try {
+      ws.send(JSON.stringify({
+        message : type,
+        data : data
+      }));
+    } catch(e){
+      ws.on('message', function(){});
+      console.log(e);
+    }
   }
 });
 
