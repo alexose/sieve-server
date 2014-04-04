@@ -18,20 +18,20 @@
       <div class="container">
         <div class="collapse navbar-collapse">
           <ul id="nav" class="nav navbar-nav">
-            <li><a href="/">Home</a></li>
+            <li><a data-pjax href="/">Home</a></li>
             <li><a href="http://github.com/alexose/sieve">Documentation</a></li>
 
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li class="dropdown-header">Non-streaming</li>
-                <li><a href="/examples/github.html">Commit message</a></li>
+                <li><a data-pjax href="/examples/github.html">Commit message</a></li>
                 <li class="divider"></li>
                 <li class="dropdown-header">Streaming</li>
-                <li><a href="/examples/streaming.html">Basic Streaming</a></li>
-                <li><a href="/examples/timeseries.html">Time Series</a></li>
-                <li><a href="/examples/placenames.html">Placenames Map</a></li>
-                <li><a href="/examples/graph.html">Connections Graph</a></li>
+                <li><a data-pjax href="/examples/streaming.html">Basic Streaming</a></li>
+                <li><a data-pjax href="/examples/timeseries.html">Time Series</a></li>
+                <li><a data-pjax href="/examples/placenames.html">Placenames Map</a></li>
+                <li><a data-pjax href="/examples/graph.html">Connections Graph</a></li>
               </ul>
             </li>
           </ul>
@@ -46,7 +46,7 @@
   <script type="text/javascript">
 
 // AJAX-y navbar functionality
-$(document).pjax('ul#nav a', '#body')
+$(document).pjax('ul#nav a[data-pjax]', '#body')
 
 // Inline editor functionality
 $(document).ready(function(){
@@ -69,7 +69,7 @@ $(document).ready(function(){
                 },
             {
                 "url": "http://yelp.com/boston",
-                "selector": "a.biz-name",
+                "selector": "$('a.biz-name')",
                 "engine": "jquery"
             },
             {
