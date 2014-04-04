@@ -55,6 +55,9 @@ wss.on('connection', function(ws){
   }
 });
 
+// Load HTML template
+var template = fs.readFileSync('index.tmpl', 'utf8');
+
 // HTTP interface
 http.createServer(function(request, response) {
 
@@ -155,6 +158,12 @@ http.createServer(function(request, response) {
         if(err) {
           respond('Error: ' + err + '.', 'text/plain', 500);
           return;
+        }
+
+        // Add template for html files
+        var ext = filename.split('.').pop();
+        if (ext.substring(0, 4) === 'html' && !request.headers['x-pjax']){
+          file = template.replace('{{body}}', file);
         }
 
         respond(file, 'text/html', 200);
