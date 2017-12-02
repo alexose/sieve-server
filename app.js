@@ -6,12 +6,14 @@ var http   = require("http")
   , qs     = require("querystring")
   , Sieve  = require("sievejs");
 
-var args   = process.argv || [];
+var args = process.argv || [];
 
 var ports = {
   http   : args[2] || 3000,
   socket : args[3] || 8080
 };
+
+var host = args[4] || 'localhost';
 
 // Websocket interface
 var WebSocketServer = require('ws').Server
@@ -30,9 +32,7 @@ wss.on('connection', function(ws){
   };
 
   ws.on('message', function(data){
-
     send('Recieved Sieve request.  Processing... ');
-
     new Sieve(data, options);
   });
 
@@ -62,6 +62,7 @@ wss.on('connection', function(ws){
 
 // Load HTML template
 var template = fs.readFileSync('index.tmpl', 'utf8');
+var baseUrl = 'http://' + host + ':' + ports.http;
 
 // HTTP interface
 http.createServer(function(request, response) {
@@ -89,9 +90,7 @@ http.createServer(function(request, response) {
 
     // Handle successful post
     request.on('end', function(){
-
       new Sieve(data, options);
-
     });
   } else {
 
@@ -168,7 +167,9 @@ http.createServer(function(request, response) {
         // Add template for html files
         var ext = filename.split('.').pop();
         if (ext.substring(0, 4) === 'html' && !request.headers['x-pjax']){
-          file = template.replace('{{body}}', file);
+          file = template
+            .replace(new RegExp('{{baseUrl}}', 'g'), baseUrl)
+            .replace(new RegExp('{{body}}'), file);
         }
 
         respond(file, 'text/html', 200);
