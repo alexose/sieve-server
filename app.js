@@ -1,5 +1,5 @@
-var http   = require("http")
-  , https  = require("https")
+var https  = require("https")
+  , crypto = require('crypto')
   , url    = require("url")
   , path   = require("path")
   , fs     = require("fs")
@@ -9,11 +9,19 @@ var http   = require("http")
 var args = process.argv || [];
 
 var ports = {
-  http   : args[2] || 3000,
+  https  : args[2] || 3000,
   socket : args[3] || 8080
 };
 
 var host = args[4] || 'localhost';
+
+try {
+	var privateKey = fs.readFileSync('client-key.pem').toString();
+	var certificate = fs.readFileSync('client-cert.pem').toString();
+} catch(e){
+	console.error(`Please generate a private key by running './makekey.sh'`); 
+  process.exit(1);
+}
 
 // Websocket interface
 var WebSocketServer = require('ws').Server
@@ -62,10 +70,19 @@ wss.on('connection', function(ws){
 
 // Load HTML template
 var template = fs.readFileSync('index.tmpl', 'utf8');
-var baseUrl = 'http://' + host + ':' + ports.http;
+var baseUrl = 'https://' + host + ':' + ports.https;
 
-// HTTP interface
-http.createServer(function(request, response) {
+// HTTPS interface
+var server = https.createServer({
+  key: privateKey, 
+  cert: certificate
+});
+server.addListener('request', handler);
+server.listen(ports.https, function(){
+  console.log('Server running on port ' + ports.https);
+});
+
+function handler(request, response) {
 
   var queries = qs.parse(request.url.split('?')[1]);
 
@@ -179,7 +196,7 @@ http.createServer(function(request, response) {
 
   function respond(string, type, code){
 
-    var origin = "http://alexose.github.io";
+    var origin = "https://alexose.github.io";
 
     type = type || "text/html";
     code = code || 200;
@@ -191,8 +208,5 @@ http.createServer(function(request, response) {
     response.write(string);
     response.end();
   }
-
-}).listen(ports.http, function(){
-  console.log('Server running on port ' + ports.http);
-});
+}
 
