@@ -4,7 +4,8 @@ var https  = require("https")
   , path   = require("path")
   , fs     = require("fs")
   , qs     = require("querystring")
-  , Sieve  = require("sievejs");
+  , sieve  = require("sievejs")
+  , djson  = require('dirty-json').parse;
 
 var args = process.argv || [];
 
@@ -41,7 +42,9 @@ wss.on('connection', function(ws){
 
   ws.on('message', function(data){
     send('Recieved Sieve request.  Processing... ');
-    new Sieve(data, options);
+    djson(data).then(function(parsed){
+      sieve(parsed, hooks);
+    });
   });
 
   function start(){
@@ -107,7 +110,9 @@ function handler(request, response) {
 
     // Handle successful post
     request.on('end', function(){
-      new Sieve(data, options);
+      djson(data).then(function(parsed){
+        sieve(parsed, hooks);
+      });
     });
   } else {
 
@@ -127,7 +132,11 @@ function handler(request, response) {
         return;
       }
 
-      new Sieve(string, options);
+      djson(string).then(function(parsed){
+        sieve(parsed, function(result){
+          finish(result);  
+        });
+      });
     } else {
       explain();
     }

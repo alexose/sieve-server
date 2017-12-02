@@ -13,6 +13,7 @@
     "url": "git@github.com:alexose/sieve-server.git"
   },
   "dependencies": {
+    "dirty-json": "^0.5.0",
     "sievejs": ">0.0.0",
     "socket.io": "~2.0.4",
     "ws": "~3.3.2"
