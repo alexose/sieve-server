@@ -16,6 +16,10 @@ var ports = {
 
 var host = args[4] || 'localhost';
 
+process.on('uncaughtException', function(err) {
+  console.log(err);
+});
+
 // Websocket interface
 var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({port: ports.socket});
@@ -65,7 +69,7 @@ wss.on('connection', function(ws){
 
 // Load HTML template
 var template = fs.readFileSync('index.tmpl', 'utf8');
-var baseUrl = 'https://' + host + ':' + ports.https;
+var baseUrl = 'https://' + host;
 
 // HTTPS interface
 var server = http.createServer();
@@ -122,9 +126,13 @@ function handler(request, response) {
       }
 
       djson(string).then(function(parsed){
-        sieve(parsed, function(result){
-          finish(result);
-        });
+        try {
+          sieve(parsed, function(result){
+            finish(result);
+          });
+        } catch(e){
+          finish(e);
+        }
       });
     } else {
       explain();
@@ -143,6 +151,10 @@ function handler(request, response) {
   // Append a result to the outgoing stream
   function increment(result){
     console.log('increment');
+  }
+
+  function handleError(e){
+
   }
 
   // End the response
