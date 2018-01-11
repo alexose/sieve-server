@@ -1,4 +1,4 @@
-var https  = require("https")
+var http  = require("http")
   , crypto = require('crypto')
   , url    = require("url")
   , path   = require("path")
@@ -10,19 +10,11 @@ var https  = require("https")
 var args = process.argv || [];
 
 var ports = {
-  https  : args[2] || 3000,
+  http  : args[2] || 3000,
   socket : args[3] || 8080
 };
 
 var host = args[4] || 'localhost';
-
-try {
-	var privateKey = fs.readFileSync('client-key.pem').toString();
-	var certificate = fs.readFileSync('client-cert.pem').toString();
-} catch(e){
-	console.error(`Please generate a private key by running './makekey.sh'`); 
-  process.exit(1);
-}
 
 // Websocket interface
 var WebSocketServer = require('ws').Server
@@ -76,13 +68,10 @@ var template = fs.readFileSync('index.tmpl', 'utf8');
 var baseUrl = 'https://' + host + ':' + ports.https;
 
 // HTTPS interface
-var server = https.createServer({
-  key: privateKey, 
-  cert: certificate
-});
+var server = http.createServer();
 server.addListener('request', handler);
-server.listen(ports.https, function(){
-  console.log('Server running on port ' + ports.https);
+server.listen(ports.http, function(){
+  console.log('Server running on port ' + ports.http);
 });
 
 function handler(request, response) {
@@ -134,7 +123,7 @@ function handler(request, response) {
 
       djson(string).then(function(parsed){
         sieve(parsed, function(result){
-          finish(result);  
+          finish(result);
         });
       });
     } else {
