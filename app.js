@@ -18,6 +18,7 @@ var host = args[4] || 'localhost';
 
 process.on('uncaughtException', function(err) {
   console.log(err);
+  console.log(err.stack);
 });
 
 // Websocket interface
