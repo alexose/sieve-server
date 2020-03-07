@@ -19,3 +19,8 @@ Usage
     npm install sieve-server
     cd sieve-server
     nodejs app.js
+
+Or, use Docker:
+
+    docker build .
+    docker run <container id>
