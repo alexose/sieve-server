@@ -19,7 +19,7 @@
         <div class="collapse navbar-collapse">
           <ul id="nav" class="nav navbar-nav">
             <li><a data-pjax href="/">Home</a></li>
-            <li><a href="http://github.com/alexose/sieve">Documentation</a></li>
+            <li><a href="https://github.com/alexose/sieve">Documentation</a></li>
 
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
@@ -51,7 +51,7 @@ $(document).pjax('ul#nav a[data-pjax]', '#body')
 // Inline editor functionality
 $(document).ready(function(){
 
-    var url = 'http://sieve.alexose.com?callback=?',
+    var url = 'https://sieve.alexose.com?callback=?',
         ele = $('#request'),
         tabs = $('#example ul li a'),
         timeout,
@@ -63,12 +63,12 @@ $(document).ready(function(){
                 "selector" : ".commit .date"
             },
             {
-                "url" : "http://google.com/finance",
+                "url" : "https://google.com/finance",
                 "selector" : "//td[@class='price']",
                 "engine" : "xpath"
                 },
             {
-                "url": "http://yelp.com/boston",
+                "url": "https://yelp.com/boston",
                 "selector": "$('a.biz-name')",
                 "engine": "jquery"
             },
@@ -248,7 +248,7 @@ var tutorial = [
     ],
 ];
 
-var server = 'http://sieve.alexose.com';
+var server = 'https://sieve.alexose.com';
 
 var post = function(server, request){
 
