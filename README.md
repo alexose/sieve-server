@@ -23,4 +23,4 @@ Usage
 Or, use Docker:
 
     docker build .
-    docker run <container id>
+    docker run --init -p 3000:3000 -t -i <container id>

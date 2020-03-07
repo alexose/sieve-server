@@ -17,4 +17,5 @@ COPY . .
 
 EXPOSE 3000 
 
+ENTRYPOINT ["/go/bin/myapp"]
 CMD [ "node", "app.js" ]

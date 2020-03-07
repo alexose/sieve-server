@@ -4,7 +4,7 @@ var http   = require("http")
   , path   = require("path")
   , fs     = require("fs")
   , qs     = require("querystring")
-  , Sieve  = require("sievejs");
+  , sieve  = require("sievejs");
 
 var args   = process.argv || [];
 
@@ -32,8 +32,7 @@ wss.on('connection', function(ws){
   ws.on('message', function(data){
 
     send('Recieved Sieve request.  Processing... ');
-
-    new Sieve(data, options);
+    sieve(data, finish); 
   });
 
   function start(){
@@ -97,6 +96,7 @@ http.createServer(function(request, response) {
 
     // TODO: Support normal query strings?
     var string;
+    var data;
 
     // Support GET base64 failover
     if (queries.json){
@@ -104,6 +104,7 @@ http.createServer(function(request, response) {
 
         // via https://groups.google.com/forum/#!topic/nodejs/m6MQDXJNx7w
         string = new Buffer(queries.json, 'base64').toString('binary');
+        data = JSON.parse(string);
       } catch(e){
 
         //error('Could not convert query from Base64 to string.  Are you sure it\'s encoded properly?');
@@ -111,7 +112,7 @@ http.createServer(function(request, response) {
         return;
       }
 
-      new Sieve(string, options);
+      sieve(data, finish); 
     } else {
       explain();
     }
